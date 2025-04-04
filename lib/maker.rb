@@ -1,5 +1,3 @@
-require 'rainbow'
-
 class Maker
   attr_reader :code
 
