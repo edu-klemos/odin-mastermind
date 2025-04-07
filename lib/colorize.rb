@@ -12,4 +12,13 @@ module Colorize
       when "6" then Rainbow("6").cyan
     end
   end
+
+  def self.remove_color pegs
+    Rainbow.uncolor(pegs)
+  end
+
+  def self.colorize_array pegs
+    pegs.map { |peg| self.colorize_peg peg}.join(" ")
+  end
+
 end

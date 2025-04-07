@@ -1,10 +1,12 @@
-require_relative 'peg.rb'
+require_relative 'peg_sequence.rb'
 
 class Board
   attr_accessor :decode_board
+  attr_reader :remaining_rows
 
   def initialize(rows)
     @decode_board = new_board rows
+    @remaining_rows = rows
   end
 
   def draw_board
@@ -15,22 +17,25 @@ class Board
     draw
   end
 
-  def add_pegs round, code_pegs, key_pegs
-    add_code_pegs round, code_pegs
-    add_key_pegs round, key_pegs
+  def add_code_pegs code_pegs
+    self.decode_board[-@remaining_rows][:code_pegs].sequence = code_pegs
+  end
+
+  def add_key_pegs key_pegs
+    self.decode_board[-@remaining_rows][:key_pegs].sequence = key_pegs
+  end
+
+  def last_key_pegs
+    self.decode_board[-@remaining_rows - 1][:key_pegs].sequence
+  end
+
+  def next_row
+    @remaining_rows -= 1
   end
 
   private
   def new_board rows
-    Array.new(rows) { {code_pegs: Peg.new, key_pegs: Peg.new} }
-  end
-
-  def add_code_pegs round, code_pegs
-    self.decode_board[round-1][:code_pegs].sequence = code_pegs
-  end
-
-  def add_key_pegs round, key_pegs
-    self.decode_board[round-1][:key_pegs].sequence = key_pegs
+    Array.new(rows) { {code_pegs: PegSequence.new, key_pegs: PegSequence.new} }
   end
 
   def board_header
@@ -41,8 +46,3 @@ class Board
     "\n#{index} => #{row[:code_pegs].sequence}  |  #{row[:key_pegs].sequence}\n"
   end
 end
-
-board = Board.new(5)
-board.add_pegs 1, "1234", "01"
-board.add_pegs 2, "4561", "11"
-puts board.draw_board

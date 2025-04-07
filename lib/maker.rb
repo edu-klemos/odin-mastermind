@@ -1,23 +1,35 @@
 class Maker
   attr_reader :code
-
-  def initialize(code)
-    @code = code
+  def initialize(board)
+    @code = []
+    @board = board
   end
 
-  def put_key_pegs(guess_sequence)
-    pegs = {red: 0, white: 0}
-    guess_sequence_array = guess_sequence.split("")
-    code_sequence = self.code.split("")
-    for code_peg in ("1".."6")
-        next unless guess_sequence_array.include? code_peg
-        next unless code_sequence.include? code_peg
-        create_key_pegs guess_sequence_array, code_sequence, code_peg, pegs
+  def generate_code
+    4.times do 
+      @code << rand(1..6).to_s
     end
+  end
+
+  def put_key_pegs_board guess_sequence
+    pegs = organize_key_pegs guess_sequence
+    pegs_array = ("1"*pegs[:red] + "0"*pegs[:white]).split("")
+    @board.add_key_pegs pegs_array
+  end
+  
+
+  private
+  def organize_key_pegs(guess_sequence)
+    pegs = {red: 0, white: 0}
+    for code_peg in ("1".."6")
+        next unless guess_sequence.include? code_peg
+        next unless @code.include? code_peg
+        self.create_key_pegs guess_sequence, @code, code_peg, pegs
+    end
+    p pegs
     pegs
   end
 
-  private
   def select_matched_indexes sequence, code_peg
     sequence.each_index.select { |index| sequence[index] == code_peg }
   end
@@ -36,8 +48,8 @@ class Maker
     unless red_pegs.empty?
       pegs[:red] += red_pegs.size
       # remove the red pegs indexes from sequences to not interfere on create_white_pegs
-      guess_matched_indexes -= red_pegs
-      code_matched_indexes -= red_pegs
+      guess_sequence_indexes.delete_if.with_index { |element, index| element == red_pegs[index] }
+      code_sequence_indexes.delete_if.with_index { |element, index| element == red_pegs[index] }
     end
   end
 
@@ -51,5 +63,3 @@ class Maker
 
 end
 
-maker = Maker.new("1333")
-p maker.put_key_pegs("3111")
